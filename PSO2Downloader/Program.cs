@@ -1,5 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.IO;
 using System.Net;
 
@@ -12,10 +15,31 @@ namespace PSO2Downloader
             if(args.Length == 0)
             {
                 Console.WriteLine("Usage -");
-                Console.WriteLine("pso2downloader /data/win32reboot/9c/a433e75e9cef9c6d0a318bde62bda6 /data/win32/1c5f7a7fbcdd873336048eaf6e26cd87");
-                Console.WriteLine("Write the path for any expected file. The author of this tool bears no responsiblity for any issues resulting from its usage.");
+                Console.WriteLine("pso2downloader /data/win32reboot/9c/a433e75e9cef9c6d0a318bde62bda6");
+                Console.WriteLine(@"pso2downloader C:\Some\Path\ToTxt\testPatch.txt");
+                Console.WriteLine(@"pso2downloader /data/win32/d596292bdefd54f2673b67f9fa313b52 C:\Some\Path\ToTxt\testPatch.txt C:\Some\OtherPath\ToOTherTxt\testPatch2.txt");
+                Console.WriteLine("Write the path for any expected file. You may also add .txt files containing a list of files (though you may not put a .txt file list reference inside another.");
+                Console.WriteLine("Either method can be used in combination for as many files as windows will let you apply as an argument.");
+                Console.WriteLine("The author of this tool bears no responsiblity for any issues resulting from its usage.");
                 return;
             }
+            #if DEBUG
+            Debugger.Launch();
+            #endif
+            //Gather files
+            List<string> files = new List<string>();
+            foreach(string arg in args)
+            {
+                if(arg.Contains(":"))
+                {
+                    files.AddRange(File.ReadAllLines(arg));
+                } else
+                {
+                    files.Add(arg);
+                }
+            }
+            
+
             string directoryToSave = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\patchData\\";
             Directory.CreateDirectory(directoryToSave);
             StreamWriter streamWriter = new StreamWriter(directoryToSave + DateTime.Now.Year.ToString() + "_" + DateTime.Now.Month.ToString("d2") + "_" 
@@ -50,8 +74,13 @@ namespace PSO2Downloader
             var backupPatchUrl = fields["BackupPatchURL"];
 
             //Go through given files
-            foreach (string file in args)
+            foreach (string file in files)
             {
+                //Account for extra lines from the user
+                if(file == "")
+                {
+                    continue;
+                }
                 Directory.CreateDirectory(directoryToSave + "\\" + Path.GetDirectoryName(file));
                 try
                 {
