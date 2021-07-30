@@ -74,10 +74,10 @@ namespace PSO2Downloader
             var backupPatchUrl = fields["BackupPatchURL"];
 
             //Go through given files
-foreach (string file in files)
+            foreach (string file in files)
             {
                 //Account for extra lines from the user
-                if(file == "")
+                if (file == "")
                 {
                     continue;
                 }
@@ -99,18 +99,35 @@ foreach (string file in files)
                 }
                 catch (Exception ex1)
                 {
-                    Console.WriteLine(ex1.Message);
                     try
                     {
-                        webClient.Headers.Add("user-agent", "AQUA_HTTP");
+                        webClient.Headers.Add("User-Agent", "AQUA_HTTP");
                         webClient.DownloadFile(backupPatchUrl + fileString + ".pat", directoryToSave + "\\" + fileString);
                         streamWriter.WriteLine(fileString + "\told patches");
                         streamWriter.Flush();
                     }
                     catch (Exception ex2)
                     {
-                        streamWriter.WriteLine(fileString + "\tfailed");
-                        streamWriter.Flush();
+                        try
+                        {
+                            webClient.Headers.Add("User-Agent", "AQUA_HTTP");
+                            webClient.DownloadFile(masterUrl + fileString + ".pat", directoryToSave + "\\" + fileString);
+                            streamWriter.WriteLine(fileString + "\tmaster");
+                            streamWriter.Flush();
+                        }
+                        catch (Exception ex3)
+                        {
+                            try
+                            {
+                                webClient.Headers.Add("User-Agent", "AQUA_HTTP");
+                                webClient.DownloadFile(backupMasterUrl + fileString + ".pat", directoryToSave + "\\" + fileString);
+                                streamWriter.WriteLine(fileString + "\told master");
+                                streamWriter.Flush();
+                            }
+                            catch (Exception ex4)
+                            {
+                            }
+                        }
                     }
                 }
             }
