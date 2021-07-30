@@ -15,7 +15,7 @@ namespace PSO2Downloader
             if(args.Length == 0)
             {
                 Console.WriteLine("Usage -");
-                Console.WriteLine("pso2downloader /data/win32reboot/9c/a433e75e9cef9c6d0a318bde62bda6");
+                Console.WriteLine("pso2downloader data/win32reboot/9c/a433e75e9cef9c6d0a318bde62bda6");
                 Console.WriteLine(@"pso2downloader C:\Some\Path\ToTxt\testPatch.txt");
                 Console.WriteLine(@"pso2downloader /data/win32/d596292bdefd54f2673b67f9fa313b52 C:\Some\Path\ToTxt\testPatch.txt C:\Some\OtherPath\ToOTherTxt\testPatch2.txt");
                 Console.WriteLine("Write the path for any expected file. You may also add .txt files containing a list of files (though you may not put a .txt file list reference inside another.");
@@ -74,34 +74,42 @@ namespace PSO2Downloader
             var backupPatchUrl = fields["BackupPatchURL"];
 
             //Go through given files
-            foreach (string file in files)
+foreach (string file in files)
             {
+                string fileString;
+                if(file[0] == '/' && file.Length > 1)
+                {
+                    fileString = file.Substring(1);
+                } else
+                {
+                    fileString = file;
+                }
                 //Account for extra lines from the user
-                if(file == "")
+                if(fileString == "")
                 {
                     continue;
                 }
-                Directory.CreateDirectory(directoryToSave + "\\" + Path.GetDirectoryName(file));
+                Directory.CreateDirectory(directoryToSave + "\\" + Path.GetDirectoryName(fileString));
                 try
                 {
-                    webClient.Headers.Add("user-agent", "AQUA_HTTP");
-                    webClient.DownloadFile(patchUrl + file + ".pat", directoryToSave + "\\" + file);
-                    //Example: webClient.DownloadFile(patchUrl + "/data/win32reboot/9c/a433e75e9cef9c6d0a318bde62bda6" + ".pat", directoryToSave + "\\" + "9ca433e75e9cef9c6d0a318bde62bda6");
-                    streamWriter.WriteLine(file + "\tpatches");
+                    webClient.Headers.Add("User-Agent", "AQUA_HTTP");
+                    webClient.DownloadFile(patchUrl + fileString + ".pat", directoryToSave + "\\" + fileString);
+                    streamWriter.WriteLine(fileString + "\tpatches");
                     streamWriter.Flush();
                 }
                 catch (Exception ex1)
                 {
+                    Console.WriteLine(ex1.Message);
                     try
                     {
                         webClient.Headers.Add("user-agent", "AQUA_HTTP");
-                        webClient.DownloadFile(backupPatchUrl + file + ".pat", directoryToSave + "\\" + file);
-                        streamWriter.WriteLine(file + "\told patches");
+                        webClient.DownloadFile(backupPatchUrl + fileString + ".pat", directoryToSave + "\\" + fileString);
+                        streamWriter.WriteLine(fileString + "\told patches");
                         streamWriter.Flush();
                     }
                     catch (Exception ex2)
                     {
-                        streamWriter.WriteLine(file + "\tfailed");
+                        streamWriter.WriteLine(fileString + "\tfailed");
                         streamWriter.Flush();
                     }
                 }
