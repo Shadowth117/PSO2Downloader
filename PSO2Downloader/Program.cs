@@ -76,6 +76,11 @@ namespace PSO2Downloader
             //Go through given files
 foreach (string file in files)
             {
+                //Account for extra lines from the user
+                if(file == "")
+                {
+                    continue;
+                }
                 string fileString;
                 if(file[0] == '/' && file.Length > 1)
                 {
@@ -83,11 +88,6 @@ foreach (string file in files)
                 } else
                 {
                     fileString = file;
-                }
-                //Account for extra lines from the user
-                if(fileString == "")
-                {
-                    continue;
                 }
                 Directory.CreateDirectory(directoryToSave + "\\" + Path.GetDirectoryName(fileString));
                 try
